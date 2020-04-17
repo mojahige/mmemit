@@ -1,4 +1,4 @@
-type Callback = (mediaQueryList: MediaQueryListEvent) => unknown;
+type Callback = (mediaQueryList: MediaQueryListEvent) => void;
 type On = (callback: Callback) => void;
 type Off = () => void;
 type Matches = () => boolean;
