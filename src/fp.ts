@@ -1,18 +1,14 @@
-type Callback = (mediaQueryList?: MediaQueryListEvent) => void;
+type Callback = (mediaQueryList: MediaQueryListEvent) => unknown;
+type On = (callback: Callback) => void;
+type Off = () => void;
+type Matches = () => boolean;
+type MMEMIT = [On, Off, Matches];
 
-export default function mmemit(mediaQueryString: string): any {
-  if (!mediaQueryString) return null;
-
+export default function mmemit(mediaQueryString: string): MMEMIT {
   let changeCallback: Callback | null = null;
-  const mediaQueryList = window.matchMedia(mediaQueryString);
-
-  const on = (callback: Callback): void => {
-    changeCallback = callback;
-  };
-
-  const off = (): void => {
-    changeCallback = null;
-  };
+  let mediaQueryList: MediaQueryList | null = window.matchMedia(
+    mediaQueryString
+  );
 
   const onChange = (event: MediaQueryListEvent): void => {
     if (changeCallback !== null) {
@@ -20,7 +16,24 @@ export default function mmemit(mediaQueryString: string): any {
     }
   };
 
+  const on: On = (callback: Callback) => {
+    changeCallback = callback;
+  };
+
+  const off: Off = () => {
+    changeCallback = null;
+
+    if (mediaQueryList) {
+      mediaQueryList.removeEventListener('change', onChange);
+      mediaQueryList = null;
+    }
+  };
+
+  const matches: Matches = () => {
+    return mediaQueryList ? mediaQueryList.matches : false;
+  };
+
   mediaQueryList.addEventListener('change', onChange);
 
-  return [on, off];
+  return [on, off, matches];
 }
